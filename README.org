@@ -1,0 +1,21 @@
+* ~zsd~
+
+cli tool to find older versions of a given file in your zfs snapshots.
+
+/For a browser based version see [[https://j-keck.github.io/zfs-snap-diff][zfs-snap-diff]]./
+
+** Documentation
+
+See the [[https://j-keck.github.io/zsd][website]] for more details.
+
+
+** Get it
+
+You can download a prebuild version from [[https://j-keck.github.io/zsd/docs/install][here]].
+
+
+** Run it
+
+#+BEGIN_SRC sh
+./zsd <FILE> <ACTION>
+#+END_SRC
