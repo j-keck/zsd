@@ -95,7 +95,7 @@ func main() {
 		if cliCfg.snapshotTimemachineOutput {
 			for idx, v := range scanResult.FileVersions {
 				fmt.Printf("%d\t%s\t%s\t%s\n",
-					idx, v.Snapshot.Name, v.Backup.Path, v.Snapshot.Created.Format("Jan 2 15:04"))
+					idx, v.Snapshot.Name, v.Backup.Path, v.Backup.MTime.Format("Mon, 02 Jan 2006 15:04:05 -0700"))
 			}
 		} else if !cliCfg.scriptingOutput {
 
