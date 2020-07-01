@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+
+jobs:
+  build:
+    name: build / publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cachix/install-nix-action@v9
+      - uses: cachix/cachix-action@v6
+        with:
+          name: zsd
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
+      - name: build for all platforms
+        run: |
+          set -x
+          git fetch --tags -f
+          VERSION=$(git describe --always)
+          for GOOS in linux freebsd darwin solaris; do
+            echo "BUILD: $GOOS"
+            BUILD=$(nix-build --no-out-link --no-build-output -A zsd --argstr goos $GOOS)
+            cp -fv $BUILD/bin/zsd .
+            cp -fv $BUILD/share/LICENSE .
+
+            ARCHIVE=zsd-$GOOS-$VERSION.tgz
+            tar cvfz $ARCHIVE zsd LICENSE
+          done
+
+      - name: upload assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: zsd*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
