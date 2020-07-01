@@ -1,0 +1,10 @@
+baseURL = "https://j-keck.github.io/zsd"
+title = "zsd"
+theme = "book"
+canonifyURLs = true
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[params]
+  BookSearch = false
