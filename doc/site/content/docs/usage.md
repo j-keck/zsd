@@ -71,6 +71,62 @@ go 1.12
 ```
 
 
+## Revert a change {#revert-a-change}
+
+You can revert a single change with the `revert` action.
+
+
+#### View a diff to the backup version {#view-a-diff-to-the-backup-version}
+
+```text
+main⟩ zsd -diff-context-size 1 -no-color cache.go diff 0
+Diff from the actual version to the version from: 2020-07-04 14:29:37.807643286 +0200 CEST
+=============================
+Chunk 0 - starting at line 13
+-----------------------------
+	j, err := json.Marshal(versions)
++	println(err)
+	if err != nil {
+
+=============================
+Chunk 1 - starting at line 18
+-----------------------------
+	cacheDir, err := fs.CacheDir()
++	println(err)
+	if err != nil {
+```
+
+
+#### Revert a single change {#revert-a-single-change}
+
+```text
+main⟩ ./zsd -diff-context-size 1 -no-color cache.go revert 0 1
+backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/zsd/cache.go_20200704_144023
+reverted:
+	cacheDir, err := fs.CacheDir()
++	println(err)
+	if err != nil {
+```
+
+
+#### Check the result {#check-the-result}
+
+```text
+main⟩ zsd -diff-context-size 1 -no-color cache.go diff 0
+Diff from the actual version to the version from: 2020-07-04 14:29:37.807643286 +0200 CEST
+=============================
+Chunk 0 - starting at line 13
+-----------------------------
+	j, err := json.Marshal(versions)
++	println(err)
+	if err != nil {
+```
+
+{{< hint warning >}}
+A backup of the current version will be created.
+{{< /hint >}}
+
+
 ## Restore file {#restore-file}
 
 To restore a given file with an older version use `restore`.
@@ -118,10 +174,11 @@ OPTIONS:
         trace output with caller location
 
 ACTIONS:
-  list                : list zfs snapshots where the given file was modified
-  cat     <#|SNAPSHOT>: show file content of the given snapshot
-  diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the actual version
-  restore <#|SNAPSHOT>: restore the file from the given snapshot
+  list                           : list zfs snapshots where the given file was modified
+  cat     <#|SNAPSHOT>           : show the file content from the given snapshot
+  diff    <#|SNAPSHOT>           : show a diff from the selected snapshot to the current version
+  revert  <#|SNAPSHOT> <CHUNK_NR>: revert the given chunk
+  restore <#|SNAPSHOT>           : restore the file from the given snapshot
 
 You can use the snapshot number from the `list` output or the snapshot name to select a snapshot.
 

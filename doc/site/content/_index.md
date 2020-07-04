@@ -16,6 +16,8 @@ With `zsd` you can
 
 -   inspect a diff from the older version to the actual version
 
+-   revert a single change
+
 -   restore a version from a zfs snapshot
 
 _For a browser based version see [zfs-snap-diff](https://j-keck.github.io/zfs-snap-diff)._

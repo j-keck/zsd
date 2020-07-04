@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
-	"github.com/j-keck/zfs-snap-diff/pkg/diff"
+	diffPkg "github.com/j-keck/zfs-snap-diff/pkg/diff"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
@@ -37,10 +37,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
-		fmt.Fprintf(os.Stderr, "  list                : list zfs snapshots where the given file was modified\n")
-		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file content from the given snapshot\n")
-		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the current version\n")
-		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file from the given snapshot\n")
+		fmt.Fprintf(os.Stderr, "  list                           : list zfs snapshots where the given file was modified\n")
+		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>           : show the file content from the given snapshot\n")
+		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>           : show a diff from the selected snapshot to the current version\n")
+		fmt.Fprintf(os.Stderr, "  revert  <#|SNAPSHOT> <CHUNK_NR>: revert the given chunk\n")
+		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>           : restore the file from the given snapshot\n")
 		fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
 		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zfs-snap-diff\n")
 	}
@@ -161,7 +162,7 @@ func main() {
 			return
 		}
 
-		diff, err := diff.NewDiffFromPath(version.Backup.Path, filePath, cliCfg.diffContextSize)
+		diff, err := diffPkg.NewDiffFromPath(version.Backup.Path, filePath, cliCfg.diffContextSize)
 		if err != nil {
 			log.Errorf("unable to create diff - %v", err)
 			return
@@ -171,7 +172,58 @@ func main() {
 			fmt.Printf("Diff from the actual version to the version from: %s\n", version.Backup.MTime)
 		}
 
-		fmt.Printf("%s", diffPrettyText(diff, cliCfg.coloredDiff))
+		fmt.Printf("%s", diffsPrettyText(diff, cliCfg.coloredDiff))
+
+	case "revert":
+		if len(flag.Args()) != 4 {
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> and / or <CHUNK_NR> missing (see `%s -h` for help)\n", zsdBin)
+			return
+		}
+
+		versionName := flag.Arg(2)
+		version, err := lookupRequestedVersion(filePath, versionName)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		diff, err := diffPkg.NewDiffFromPath(version.Backup.Path, filePath, cliCfg.diffContextSize)
+		if err != nil {
+			log.Errorf("unable to create diff - %v", err)
+			return
+		}
+
+		chunkNr, err := strconv.Atoi(flag.Arg(3))
+		if err != nil {
+			log.Errorf("given chunk-nr was not a number - %v", err)
+			return
+		}
+
+		if chunkNr < 0 || chunkNr >= len(diff.Deltas) {
+			log.Errorf("given chunk-nr was out of range - valid range: 0..%d", len(diff.Deltas)-1)
+			return
+		}
+		deltas := diff.Deltas[chunkNr]
+
+		backupPath, err := version.Current.Backup()
+		if err != nil {
+			log.Errorf("unable to backup the current version - %v", err)
+			return
+		}
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("backup from the actual version created at: %s\n", backupPath)
+		}
+
+		// revert the given chunk
+		err = diffPkg.PatchPath(filePath, deltas)
+		if err != nil {
+			log.Errorf("unable to revert chunk-nr: %d - err: %v", chunkNr, err)
+			return
+		}
+
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("reverted: \n%s", diffPrettyText(deltas, cliCfg.coloredDiff))
+		}
 
 	case "restore":
 		if len(flag.Args()) != 3 {
@@ -241,7 +293,6 @@ func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion,
 		return nil, errors.New("invalid cache - initialize cache with `zsd <FILE> list")
 	}
 
-
 	// verify the file exists (maybe the snapshot was deleted after the `list` action)
 	switch _, err := os.Stat(version.Backup.Path); err.(type) {
 	case nil:
@@ -291,7 +342,6 @@ func parseFlags() CliConfig {
 
 	flag.IntVar(&cliCfg.diffContextSize, "diff-context-size", config.Get.DiffContextSize,
 		"show N lines before and after each diff")
-
 
 	// logging
 	cliCfg.logLevel = plog.Note
