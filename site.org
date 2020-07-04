@@ -257,9 +257,38 @@ ACTIONS:
 
 You can use the snapshot number from the `list` output or the snapshot name to select a snapshot.
 
-Project home page: https://j-keck.github.io/zfs-snap-diff
+Project home page: https://j-keck.github.io/zsd
 #+END_EXAMPLE
 
+
+* Changelog
+:PROPERTIES:
+:export_file_name: changelog
+:export_hugo_weight: 50
+:export_hugo_section: docs
+:END:
+
+** 1.2.0
+
+  - new action: revert to revert a single change ([[https://j-keck.github.io/zsd/docs/usage/#revert-a-change][Usage]])
+  - show age in hours if it's younger than 48 hours
+  - diff context size configurable (flag: -diff-context-size 3)
+  - show diff in chunks
+  - include "File changed" age in list action
+
+[[https://github.com/j-keck/zsd/compare/v1.1.2...v1.2.0][all commits from v1.1.2 to v1.2.0]]
+
+** 1.1.2
+
+ - update ~-snapshot-timemachine~ format
+   - use the file timestamp instead of the snapshot timestamp
+   - change the timestamp format
+
+[[https://github.com/j-keck/zsd/compare/v1.1.1...v1.1.2][all commits from v1.1.1 to v1.1.2]]
+
+** 1.1.1
+
+Import from [[https://j-keck.github.io/zfs-snap-diff][zfs-snap-diff]].
 
 * Contact / Support
   :PROPERTIES:

@@ -185,5 +185,5 @@ ACTIONS:
 
 You can use the snapshot number from the `list` output or the snapshot name to select a snapshot.
 
-Project home page: https://j-keck.github.io/zfs-snap-diff
+Project home page: https://j-keck.github.io/zsd
 ```
