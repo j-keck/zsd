@@ -26,6 +26,7 @@ type CliConfig struct {
 	scriptingOutput           bool
 	snapshotTimemachineOutput bool
 	coloredDiff               bool
+	diffContextSize           int
 }
 
 func main() {
@@ -160,7 +161,7 @@ func main() {
 			return
 		}
 
-		diffs, err := diff.NewDiffFromPath(version.Backup.Path, filePath, 5)
+		diff, err := diff.NewDiffFromPath(version.Backup.Path, filePath, cliCfg.diffContextSize)
 		if err != nil {
 			log.Errorf("unable to create diff - %v", err)
 			return
@@ -287,6 +288,9 @@ func parseFlags() CliConfig {
 	var noColoredDiff bool
 	flag.BoolVar(&noColoredDiff, "no-color", false,
 		"Don't use colored diff output use '+' / '-' for inserts / removed lines")
+
+	flag.IntVar(&cliCfg.diffContextSize, "diff-context-size", config.Get.DiffContextSize,
+		"show N lines before and after each diff")
 
 
 	// logging
