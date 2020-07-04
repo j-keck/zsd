@@ -106,11 +106,12 @@ func main() {
 			}
 
 			// show snapshots where the file was modified
-			header := fmt.Sprintf("%3s | %-[2]*s | %s", "#", width, "Snapshot", "Snapshot age")
+			header := fmt.Sprintf("%3s | %-12s | %-[3]*s | %12s", "#", "File changed", width, "Snapshot", "Snapshot age")
 			fmt.Printf("%s\n%s\n", header, strings.Repeat("-", len(header)))
 			for idx, v := range scanResult.FileVersions {
-				age := humanDuration(time.Since(v.Snapshot.Created))
-				fmt.Printf("%3d | %-[2]*s | %s\n", idx, width, v.Snapshot.Name, age)
+				mtimeAge := humanDuration(time.Since(v.Backup.MTime))
+				snapAge := humanDuration(time.Since(v.Snapshot.Created))
+				fmt.Printf("%3d | %12s | %[3]*s | %12s\n", idx, mtimeAge, width, v.Snapshot.Name, snapAge)
 			}
 		} else {
 			for idx, v := range scanResult.FileVersions {
