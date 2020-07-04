@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>zsd</title><link>https://j-keck.github.io/zsd/</link><description>Recent content on zsd</description><generator>Hugo -- gohugo.io</generator><atom:link href="https://j-keck.github.io/zsd/index.xml" rel="self" type="application/rss+xml"/><item><title>Installation</title><link>https://j-keck.github.io/zsd/docs/install/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zsd/docs/install/</guid><description>You can download the latest binary from here or from the GitHub release page.
-Linux (x64) 1.) Download the latest version: zsd-linux-v1.1.2.tgz
+Linux (x64) 1.) Download the latest version: zsd-linux-v1.2.0.tgz
 2.) Run it: ./zsd &amp;lt;FILE&amp;gt; &amp;lt;ACTION&amp;gt;
-FreeBSD (x64) 1.) Download the latest version: zsd-freebsd-v1.1.2.tgz
+FreeBSD (x64) 1.) Download the latest version: zsd-freebsd-v1.2.0.tgz
 2.) Run it: ./zsd &amp;lt;FILE&amp;gt; &amp;lt;ACTION&amp;gt;
-Solaris (x64) 1.) Download the latest version: zsd-solaris-v1.1.2.tgz
+Solaris (x64) 1.) Download the latest version: zsd-solaris-v1.2.0.tgz
 2.) Run it: ./zsd &amp;lt;FILE&amp;gt; &amp;lt;ACTION&amp;gt;
 Mac OS (x64) 1.) Download the latest version: zsd-darwin-v1.</description></item><item><title>Usage</title><link>https://j-keck.github.io/zsd/docs/usage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zsd/docs/usage/</guid><description>List snapshots Use the list action to list all snapshots where the given file was modified.
 main⟩ zsd go.mod list scan the last 7 days for other file versions # | Snapshot | Snapshot age ----------------------------------------------------------- 0 | zfs-auto-snap_hourly-2020-02-12-12h00U | 5 hours 1 | zfs-auto-snap_hourly-2020-02-12-09h00U | 8 hours Show file content Use the cat action to show the file content from the given snapshot.
