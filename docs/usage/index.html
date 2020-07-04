@@ -51,7 +51,7 @@ Chunk 1 - starting at line 18
 	cacheDir, err := fs.CacheDir()
 +	println(err)
 	if err != nil {
-</code></pre></div><h4 id=revert-a-single-change>Revert a single change</h4><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text>main⟩ ./zsd -diff-context-size 1 -no-color cache.go revert 0 1
+</code></pre></div><h4 id=revert-a-single-change>Revert a single change</h4><p>Use the chunk-nr from the <code>diff</code> output - use the number in <strong><strong>Chunk <nr></strong></strong>.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text>main⟩ ./zsd -diff-context-size 1 -no-color cache.go revert 0 1
 backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/zsd/cache.go_20200704_144023
 reverted:
 	cacheDir, err := fs.CacheDir()
