@@ -99,6 +99,9 @@ Chunk 1 - starting at line 18
 
 #### Revert a single change {#revert-a-single-change}
 
+Use the chunk-nr from the `diff` output to select the change to revert.
+See the ****Chunk &lt;NR&gt;**** line to get it.
+
 ```text
 main⟩ ./zsd -diff-context-size 1 -no-color cache.go revert 0 1
 backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/zsd/cache.go_20200704_144023

@@ -69,6 +69,7 @@ You can download the latest binary from here or from the [[https://github.com/j-
        (princ "{{< /tabs >}}\n\n")))
  #+END_SRC
 
+Checkout [[/docs/usage][Usage]] how to use it.
 
 * Usage
   :PROPERTIES:
@@ -167,7 +168,11 @@ Chunk 1 - starting at line 18
 
 #+END_EXAMPLE
 
+
 **** Revert a single change
+
+Use the chunk-nr from the ~diff~ output to select the change to revert.
+See the **Chunk &lt;NR&gt;** line to get it.
 
 #+BEGIN_EXAMPLE
 main⟩ ./zsd -diff-context-size 1 -no-color cache.go revert 0 1
