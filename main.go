@@ -25,6 +25,7 @@ type CliConfig struct {
 	printVersion              bool
 	scriptingOutput           bool
 	snapshotTimemachineOutput bool
+	coloredDiff               bool
 }
 
 func main() {
@@ -168,7 +169,8 @@ func main() {
 		if !cliCfg.scriptingOutput {
 			fmt.Printf("Diff from the actual version to the version from: %s\n", version.Backup.MTime)
 		}
-		fmt.Printf("%s", diffs.PrettyTextDiff)
+
+		fmt.Printf("%s", diffPrettyText(diff, cliCfg.coloredDiff))
 
 	case "restore":
 		if len(flag.Args()) != 3 {
@@ -282,6 +284,11 @@ func parseFlags() CliConfig {
 	flag.BoolVar(&cliCfg.snapshotTimemachineOutput, "snapshot-timemachine", false,
 		"Special output for Snapshot-timemachine (https://github.com/mrBliss/snapshot-timemachine)")
 
+	var noColoredDiff bool
+	flag.BoolVar(&noColoredDiff, "no-color", false,
+		"Don't use colored diff output use '+' / '-' for inserts / removed lines")
+
+
 	// logging
 	cliCfg.logLevel = plog.Note
 	plog.FlagDebugVar(&cliCfg.logLevel, "v", "debug output")
@@ -294,6 +301,7 @@ func parseFlags() CliConfig {
 		"mount snapshot (only necessary if it's not mounted by zfs automatically)")
 
 	flag.Parse()
+	cliCfg.coloredDiff = !noColoredDiff
 	return *cliCfg
 }
 
