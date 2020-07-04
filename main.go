@@ -233,10 +233,20 @@ func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion,
 		}
 	}
 
-	if version.Current.Path == filePath {
+	// verify the cache is for the requested file
+	if version.Current.Path != filePath {
+		return nil, errors.New("invalid cache - initialize cache with `zsd <FILE> list")
+	}
+
+
+	// verify the file exists (maybe the snapshot was deleted after the `list` action)
+	switch _, err := os.Stat(version.Backup.Path); err.(type) {
+	case nil:
 		return version, nil
-	} else {
-		return nil, errors.New("file mismatch - perform a `list` action at first")
+	case *os.PathError:
+		return nil, errors.New("obsolete cache - reload cache with `zsd <FILE> list`")
+	default:
+		return nil, err
 	}
 }
 
