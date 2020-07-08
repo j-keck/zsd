@@ -43,7 +43,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  revert  <#|SNAPSHOT> <CHUNK_NR>: revert the given chunk\n")
 		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>           : restore the file from the given snapshot\n")
 		fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
-		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zfs-snap-diff\n")
+		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zsd\n")
 	}
 
 	initLogger()
