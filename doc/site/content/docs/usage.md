@@ -10,13 +10,17 @@ weight = 30
 Use the `list` action to list all snapshots where the
 given file was modified.
 
+`zsd` lists only snapshots where the given file was modified.
+You can adjust the number of days to scan with the `-d` flag.
+
 ```text
-main⟩ zsd go.mod list
-scan the last 7 days for other file versions
-  # | Snapshot                               | Snapshot age
------------------------------------------------------------
-  0 | zfs-auto-snap_hourly-2020-02-12-12h00U | 5 hours
-  1 | zfs-auto-snap_hourly-2020-02-12-09h00U | 8 hours
+ main⟩ zsd main.go list
+scan the last 2 days for other file versions
+  # | File changed | Snapshot                                 | Snapshot age
+----------------------------------------------------------------------------
+  0 |   20 minutes | zfs-auto-snap_frequent-2020-07-12-14h00U |   18 minutes
+  1 |   34 minutes | zfs-auto-snap_frequent-2020-07-12-13h45U |   33 minutes
+  2 |   49 minutes | zfs-auto-snap_frequent-2020-07-12-13h30U |   48 minutes
 ```
 
 
@@ -31,16 +35,13 @@ or the snapshot name to select a snapshot.
 {{< /hint >}}
 
 ```text
-main⟩ zsd go.mod cat 0
-module github.com/j-keck/zfs-snap-diff
+ # i use `head` here to keep the example short
+ main⟩ zsd main.go cat 2 | head -5
+package main
 
-require (
-	github.com/j-keck/go-diff v1.0.0
-	github.com/j-keck/plog v0.5.0
-	github.com/stretchr/testify v1.4.0 // indirect
-)
-
-go 1.12
+import (
+	"errors"
+	"flag"
 ```
 
 
@@ -55,19 +56,35 @@ or the snapshot name to select a snapshot.
 {{< /hint >}}
 
 ```text
-main⟩ zsd go.mod diff 0
-Diff from the actual version to the version from: 2020-02-12 10:07:44.434355182 +0100 CET
-module github.com/j-keck/zfs-snap-diff
+ # i use `head` here to keep the example short
+ main⟩ zsd -no-color -diff-context-size 2 main.go diff 1  | head -30
+Diff from the actual version to the version from: 2020-07-12 15:44:43.566374368 +0200 CEST
+=============================
+Chunk 0 - starting at line 43
+-----------------------------
+        fmt.Fprintf(os.Stderr, "  revert  <#|SNAPSHOT> <CHUNK_NR>: revert the given chunk\n")
+		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>           : restore the file from the given snapshot\n")
+-       fmt.Fprintf(os.Stderr, "  grep    <PATTERN>              : grep changed lines\n")
++       fmt.Fprintf(os.Stderr, "  grep    <PATTERN>              : grep changes\n")
+        fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
+		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zsd\n")
 
-require (
-   github.com/BurntSushi/toml v0.3.1
-   github.com/j-keck/go-diff v1.0.0
--  github.com/j-keck/plog v0.5.0
-+  github.com/j-keck/plog v0.6.0
-   github.com/stretchr/testify v1.4.0 // indirect
-)
+==============================
+Chunk 1 - starting at line 264
+------------------------------
+        pattern := strings.ToLower(flag.Arg(2))
 
-go 1.12
++       if !cliCfg.scriptingOutput {
++           fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
++       }
+
+        dr := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
+		sc := scanner.NewScanner(dr, "auto", ds, zfs)
+
+==============================
+Chunk 2 - starting at line 272
+------------------------------
+        }
 ```
 
 
@@ -150,6 +167,21 @@ A backup of the current version will be created.
 {{< /hint >}}
 
 
+## Grep changes {#grep-changes}
+
+You can search changes with `grep <PATTERN>`. This search only changed lines.
+
+To view the whole diff use the snapshot number or snapshot name from the output.
+
+```text
+ main⟩ zsd main.go grep trim
+scan the last 2 days for other file versions
+  # | File changed | Snapshot                                 | Snapshot age |  Line | Change
+------------------------------------------------------------------------------------------------------------------------
+  3 |      1 hours |   zfs-auto-snap_hourly-2020-07-12-13h00U |      2 hours |   285 | + line := strings.TrimSpace(line)
+```
+
+
 ## Flags {#flags}
 
 Use the `-h` flag to see the supported flags.
@@ -182,6 +214,7 @@ ACTIONS:
   diff    <#|SNAPSHOT>           : show a diff from the selected snapshot to the current version
   revert  <#|SNAPSHOT> <CHUNK_NR>: revert the given chunk
   restore <#|SNAPSHOT>           : restore the file from the given snapshot
+  grep    <PATTERN>              : grep changes
 
 You can use the snapshot number from the `list` output or the snapshot name to select a snapshot.
 

@@ -20,6 +20,8 @@ With `zsd` you can
 
 -   restore a version from a zfs snapshot
 
+-   grep changes
+
 _For a browser based version see [zfs-snap-diff](https://j-keck.github.io/zfs-snap-diff)._
 
 

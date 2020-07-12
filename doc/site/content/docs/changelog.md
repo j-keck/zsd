@@ -5,6 +5,13 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 50
 +++
 
+## 1.3.0 {#1-dot-3-dot-0}
+
+-   new action: `grep` to search changes ([Usage](https://j-keck.github.io/zsd/docs/usage/#grep-changes))
+
+[all commits from v1.2.0 to v1.3.0](https://github.com/j-keck/zsd/compare/v1.2.0...v1.3.0)
+
+
 ## 1.2.0 {#1-dot-2-dot-0}
 
 -   new action: revert to revert a single change ([Usage](https://j-keck.github.io/zsd/docs/usage/#revert-a-change))
