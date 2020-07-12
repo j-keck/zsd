@@ -42,6 +42,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>           : show a diff from the selected snapshot to the current version\n")
 		fmt.Fprintf(os.Stderr, "  revert  <#|SNAPSHOT> <CHUNK_NR>: revert the given chunk\n")
 		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>           : restore the file from the given snapshot\n")
+		fmt.Fprintf(os.Stderr, "  grep    <PATTERN>              : grep changes\n")
 		fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
 		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zsd\n")
 	}
@@ -252,6 +253,89 @@ func main() {
 
 		if !cliCfg.scriptingOutput {
 			fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
+		}
+
+	case "grep":
+		if len(flag.Args()) != 3 {
+			fmt.Fprintf(os.Stderr, "Argument <PATTERN> missing (see `%s -h` for help)\n", zsdBin)
+			return
+		}
+
+		pattern := strings.ToLower(flag.Arg(2))
+
+		dr := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
+		sc := scanner.NewScanner(dr, "auto", ds, zfs)
+		scanResult, err := sc.FindFileVersions(filePath)
+		if err != nil {
+			log.Errorf("scan failed - %v", err)
+			return
+		}
+
+		cacheFileVersions(scanResult.FileVersions)
+
+		maxSnapNameWidth := 0
+		if !cliCfg.scriptingOutput {
+			// find the longest snapshot name to format the output table
+			for _, v := range scanResult.FileVersions {
+				maxSnapNameWidth = int(math.Max(float64(maxSnapNameWidth), float64(len(v.Snapshot.Name))))
+			}
+
+			header := fmt.Sprintf("%3s | %-12s | %-[3]*s | %12s | %5s | %-33s", "#",
+				"File changed", maxSnapNameWidth, "Snapshot", "Snapshot age", "Line", "Change")
+			fmt.Printf("%s\n%s\n", header, strings.Repeat("-", len(header)))
+		}
+
+		for versionIdx, version := range scanResult.FileVersions {
+			a := version.Backup.Path
+			b := filePath
+			if versionIdx > 0 {
+				b = scanResult.FileVersions[versionIdx - 1].Backup.Path
+			}
+			bFh, err := fs.GetFileHandle(b)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+
+			diff, err := diffPkg.NewDiffFromPath(a, b, cliCfg.diffContextSize)
+			if err != nil {
+				log.Errorf("unable to create diff - %v", err)
+				return
+			}
+
+			for _, chunks := range diff.Deltas {
+				for _, delta := range chunks {
+					if delta.Type == diffPkg.Del || delta.Type == diffPkg.Ins {
+						lines := strings.Split(delta.Text, "\n")
+						for lineOffset, line := range lines {
+							if strings.Contains(strings.ToLower(line), pattern) {
+								var change string
+								switch delta.Type {
+								case diffPkg.Del: change = "-"
+								case diffPkg.Ins: change = "+"
+								}
+
+								mTimeAge := humanDuration(time.Since(bFh.MTime))
+								snapAge := humanDuration(time.Since(version.Snapshot.Created))
+								ln := delta.LineNrFrom + lineOffset
+								line := strings.TrimSpace(line)
+
+								if !cliCfg.scriptingOutput {
+									fmt.Printf("%3d | %12s | %[3]*s | %12s | %5d | %1s %s\n",
+										versionIdx, mTimeAge, maxSnapNameWidth, version.Snapshot.Name, snapAge, ln, change, line)
+								} else {
+									mTime := bFh.MTime.Format("Mon, 02 Jan 2006 15:04:05 -0700")
+									snapTime := version.Snapshot.Created.Format("Mon, 02 Jan 2006 15:04:05 -0700")
+									fmt.Printf("%3d\t%12s\t%s\t%s\t%d\t%1s %s\n",
+										versionIdx, mTime, version.Snapshot.Name, snapTime, ln, change, line)
+								}
+							}
+						}
+					}
+				}
+			}
+
 		}
 
 	default:
