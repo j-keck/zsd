@@ -263,6 +263,10 @@ func main() {
 
 		pattern := strings.ToLower(flag.Arg(2))
 
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
+		}
+
 		dr := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
 		sc := scanner.NewScanner(dr, "auto", ds, zfs)
 		scanResult, err := sc.FindFileVersions(filePath)
