@@ -19,3 +19,9 @@ You can download a prebuild version from [[https://j-keck.github.io/zsd/docs/ins
 #+BEGIN_SRC sh
 ./zsd <FILE> <ACTION>
 #+END_SRC
+
+*** Nix flakes
+
+#+BEGIN_SRC sh
+nix run github:j-keck/zsd
+#+END_SRC
